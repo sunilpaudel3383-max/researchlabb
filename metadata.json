@@ -1,0 +1,7 @@
+{
+  "name": "CollabScholar - Real-Time Collaborative Research Paper Workspace",
+  "description": "Enterprise-grade real-time collaborative research paper editor with simultaneous multi-user CRDT synchronization, scientific equation formatting, reference and BibTeX management, peer review suggestions, version history, and Google Drive integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

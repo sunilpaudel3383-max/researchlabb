@@ -68,59 +68,72 @@ export const Navigation: React.FC<NavigationProps> = ({
           )}
         </div>
 
-        {/* Zone 2: Navigation Links */}
-        <nav className="hidden md:flex items-center space-x-1 text-xs font-medium text-stone-600">
-          <button
-            onClick={() => onNavigate('landing')}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-              currentPage === 'landing' ? 'text-indigo-900 font-semibold bg-stone-100' : 'hover:text-stone-900'
-            }`}
-          >
-            Overview
-          </button>
+        {/* Zone 2: Navigation Links (Internal workspaces hidden for normal visitors) */}
+        {currentUser ? (
+          <nav className="hidden md:flex items-center space-x-1 text-xs font-medium text-stone-600">
+            <button
+              onClick={() => onNavigate('landing')}
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+                currentPage === 'landing' ? 'text-indigo-900 font-semibold bg-stone-100' : 'hover:text-stone-900'
+              }`}
+            >
+              Overview
+            </button>
 
-          <button
-            onClick={() => onNavigate('dashboard')}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-              currentPage === 'dashboard' ? 'text-indigo-900 font-semibold bg-stone-100' : 'hover:text-stone-900'
-            }`}
-          >
-            {platformType === 'admin' ? 'Lab Manuscripts' : 'My Manuscripts'}
-          </button>
+            <button
+              onClick={() => onNavigate('dashboard')}
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+                currentPage === 'dashboard' ? 'text-indigo-900 font-semibold bg-stone-100' : 'hover:text-stone-900'
+              }`}
+            >
+              {platformType === 'admin' ? 'Lab Manuscripts' : 'My Manuscripts'}
+            </button>
 
-          <button
-            onClick={() => onNavigate('editor')}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap flex items-center space-x-1.5 ${
-              currentPage === 'editor' ? 'text-indigo-900 font-semibold bg-indigo-50 text-indigo-700' : 'hover:text-stone-900'
-            }`}
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-            <span>Paper Editor</span>
-            {activeDocTitle && (
-              <span className="text-[10px] text-stone-400 font-mono truncate max-w-[110px]">
-                ({activeDocTitle.split(' ')[0]}...)
-              </span>
-            )}
-          </button>
+            <button
+              onClick={() => onNavigate('editor')}
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap flex items-center space-x-1.5 ${
+                currentPage === 'editor' ? 'text-indigo-900 font-semibold bg-indigo-50 text-indigo-700' : 'hover:text-stone-900'
+              }`}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>Paper Editor</span>
+              {activeDocTitle && (
+                <span className="text-[10px] text-stone-400 font-mono truncate max-w-[110px]">
+                  ({activeDocTitle.split(' ')[0]}...)
+                </span>
+              )}
+            </button>
 
-          <button
-            onClick={() => onNavigate('references')}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-              currentPage === 'references' ? 'text-indigo-900 font-semibold bg-stone-100' : 'hover:text-stone-900'
-            }`}
-          >
-            References
-          </button>
+            <button
+              onClick={() => onNavigate('references')}
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+                currentPage === 'references' ? 'text-indigo-900 font-semibold bg-stone-100' : 'hover:text-stone-900'
+              }`}
+            >
+              References
+            </button>
 
-          <button
-            onClick={() => onNavigate('team')}
-            className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-              currentPage === 'team' ? 'text-indigo-900 font-semibold bg-stone-100' : 'hover:text-stone-900'
-            }`}
-          >
-            {platformType === 'admin' ? 'Lab Team & Access' : 'Lab Members'}
-          </button>
-        </nav>
+            <button
+              onClick={() => onNavigate('team')}
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+                currentPage === 'team' ? 'text-indigo-900 font-semibold bg-stone-100' : 'hover:text-stone-900'
+              }`}
+            >
+              {platformType === 'admin' ? 'Lab Team & Access' : 'Lab Members'}
+            </button>
+          </nav>
+        ) : (
+          <nav className="hidden md:flex items-center space-x-1 text-xs font-medium text-stone-600">
+            <button
+              onClick={() => onNavigate('landing')}
+              className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
+                currentPage === 'landing' ? 'text-indigo-900 font-semibold bg-stone-100' : 'hover:text-stone-900'
+              }`}
+            >
+              Overview
+            </button>
+          </nav>
+        )}
 
         {/* Zone 3: User Status / Auth Action */}
         <div className="flex items-center space-x-3 shrink-0">

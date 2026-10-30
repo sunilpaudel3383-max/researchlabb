@@ -306,7 +306,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                           <button
                             onClick={() => onRevokeAccess(c.id)}
                             className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded"
-                            title="Revoke Access (Terminates Live Session)"
+                            title="Remove Collaborator from this Manuscript (User remains registered in lab)"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

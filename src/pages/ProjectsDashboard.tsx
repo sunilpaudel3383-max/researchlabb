@@ -20,6 +20,7 @@ import {
   UserCheck,
   AlertCircle,
   MessageSquare,
+  Trash2,
 } from 'lucide-react';
 import { ResearchDocument, DocumentRole, Collaborator } from '../lib/types';
 import { generateDocxBlob } from '../lib/docx-export';
@@ -32,6 +33,7 @@ interface ProjectsDashboardProps {
   onCreateNewDoc: (docType: 'journal' | 'conference' | 'lit_review' | 'technical_report', title: string) => void;
   onOpenDriveModal: (doc: ResearchDocument) => void;
   onOpenShareModal: (doc: ResearchDocument) => void;
+  onDeleteDoc?: (docId: string) => void;
   currentUser: Collaborator | null;
   platformType: 'admin' | 'member' | 'guest';
 }
@@ -44,6 +46,7 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
   onCreateNewDoc,
   onOpenDriveModal,
   onOpenShareModal,
+  onDeleteDoc,
   currentUser,
   platformType,
 }) => {
@@ -52,6 +55,7 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newDocType, setNewDocType] = useState<'journal' | 'conference' | 'lit_review' | 'technical_report'>('journal');
+  const [docToDelete, setDocToDelete] = useState<ResearchDocument | null>(null);
 
   const isAdmin = platformType === 'admin';
 
@@ -347,13 +351,24 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
                       <HardDrive className="w-4 h-4" />
                     </button>
                     {isAdmin && (
-                      <button
-                        onClick={() => onOpenShareModal(doc)}
-                        className="p-2 text-stone-400 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
-                        title="Manage Collaborator Permissions (Admin)"
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => onOpenShareModal(doc)}
+                          className="p-2 text-stone-400 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors cursor-pointer"
+                          title="Manage Collaborator Permissions (Admin)"
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDocToDelete(doc)}
+                          className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          title="Delete Manuscript Permanently (Admin Only)"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
                     )}
                   </div>
 
@@ -472,6 +487,49 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Manuscript Confirmation Modal */}
+      {docToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-md p-6 space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-serif font-bold text-lg text-stone-900">
+                Permanently Delete Manuscript?
+              </h3>
+              <p className="text-xs text-stone-600 leading-relaxed mt-1 font-serif">
+                Are you sure you want to permanently delete{' '}
+                <strong className="text-stone-900 font-sans">"{docToDelete.title}"</strong>?
+                This will remove all text sections, scientific formulas, citations, and version history from the laboratory directorate.
+                This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex justify-end space-x-2 pt-3 border-t border-stone-100">
+              <button
+                type="button"
+                onClick={() => setDocToDelete(null)}
+                className="px-4 py-2 text-xs text-stone-600 hover:text-stone-800 rounded-xl cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (onDeleteDoc && docToDelete) {
+                    onDeleteDoc(docToDelete.id);
+                  }
+                  setDocToDelete(null);
+                }}
+                className="px-5 py-2 text-xs bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-semibold shadow-xs transition-colors cursor-pointer"
+              >
+                Delete Manuscript
+              </button>
+            </div>
           </div>
         </div>
       )}

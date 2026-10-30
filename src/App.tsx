@@ -46,6 +46,13 @@ export default function App() {
   const [currentPersona, setCurrentPersona] = useState<Collaborator | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<DocumentRole>('viewer');
 
+  // Strict Protection: Normal visitors cannot access internal workspaces (manuscripts, editor, team, references)
+  useEffect(() => {
+    if (!currentPersona && currentPage !== 'landing' && currentPage !== 'login') {
+      setCurrentPage('login');
+    }
+  }, [currentPersona, currentPage]);
+
   // Registered members (dynamic list governed strictly by Admin Sunil)
   const [registeredMembers, setRegisteredMembers] = useState<Collaborator[]>(() => {
     try {
@@ -516,21 +523,45 @@ export default function App() {
     }
   };
 
-  const handleRevokeAccess = (userId: string) => {
+  // Remove collaborator access from this specific paper ONLY (DOES NOT delete the user account)
+  const handleRemoveCollaboratorFromDocument = (userId: string) => {
+    if (document) {
+      setDocument(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          collaborators: prev.collaborators.filter(c => c.id !== userId),
+        };
+      });
+
+      setAllDocuments(docs =>
+        docs.map(d =>
+          d.id === document.id
+            ? { ...d, collaborators: d.collaborators.filter(c => c.id !== userId) }
+            : d
+        )
+      );
+
+      clientRef.current?.sendRevokeCollaborator(userId);
+    }
+  };
+
+  // Deregister researcher completely from the Laboratory Directory (Admin only in Team page)
+  const handleDeregisterLabMember = (userId: string) => {
     if (userId === 'user-sunil' || userId === ADMIN_USER.id) {
       alert('Cannot revoke the Principal Investigator.');
       return;
     }
 
-    // 1. Remove from registeredMembers state
+    // 1. Remove from registeredMembers state & localStorage
     setRegisteredMembers(prev => prev.filter(m => m.id !== userId));
 
-    // 2. Remove from server backend
+    // 2. Remove from backend persistent disk
     fetch(`/api/members?id=${userId}`, { method: 'DELETE' }).catch(e =>
       console.warn('Failed to delete member on backend:', e)
     );
 
-    // 3. Remove from all documents
+    // 3. Remove this user from all documents they were attached to
     setAllDocuments(docs =>
       docs.map(d => ({
         ...d,
@@ -547,6 +578,34 @@ export default function App() {
         };
       });
       clientRef.current?.sendRevokeCollaborator(userId);
+    }
+  };
+
+  // Delete Research Manuscript (Admin only)
+  const handleDeleteManuscript = (docId: string) => {
+    if (!isUserAdmin) {
+      alert('Only the laboratory administrator can delete research manuscripts.');
+      return;
+    }
+
+    // 1. Remove from allDocuments state & localStorage
+    setAllDocuments(prev => prev.filter(d => d.id !== docId));
+
+    // 2. Remove from server backend
+    fetch(`/api/documents?id=${docId}`, { method: 'DELETE' }).catch(e =>
+      console.warn('Failed to delete manuscript on backend:', e)
+    );
+
+    // 3. If currently selected document is deleted, switch or reset
+    if (currentDocId === docId) {
+      const remaining = allDocuments.filter(d => d.id !== docId);
+      if (remaining.length > 0) {
+        setCurrentDocId(remaining[0].id);
+        setDocument(remaining[0]);
+      } else {
+        setCurrentDocId('');
+        setDocument(null);
+      }
     }
   };
 
@@ -1049,6 +1108,7 @@ export default function App() {
               setDocument(doc);
               setIsShareModalOpen(true);
             }}
+            onDeleteDoc={handleDeleteManuscript}
             currentUser={currentPersona}
             platformType={platformType}
           />
@@ -1080,7 +1140,7 @@ export default function App() {
             currentUserId={currentPersona?.id || ''}
             platformType={platformType}
             onUpdateRole={handleUpdateCollaboratorRole}
-            onRevokeAccess={handleRevokeAccess}
+            onRevokeAccess={handleDeregisterLabMember}
             onTransferOwnership={handleTransferOwnership}
             onAddCollaborator={handleAddCollaborator}
             onToggleDocAssignment={handleToggleDocAssignment}
@@ -1365,7 +1425,7 @@ export default function App() {
             currentUserRole={currentUserRole}
             isArchived={document.isArchived}
             onUpdateRole={handleUpdateCollaboratorRole}
-            onRevokeAccess={handleRevokeAccess}
+            onRevokeAccess={handleRemoveCollaboratorFromDocument}
             onTransferOwnership={handleTransferOwnership}
             onToggleArchive={handleToggleArchive}
             onAddCollaborator={handleAddCollaborator}

@@ -931,6 +931,22 @@ export function mountRestEndpoints(app: any) {
       return;
     }
 
+    if (req.method === 'DELETE') {
+      const url = new URL(req.url, 'http://localhost');
+      const docId = url.searchParams.get('id') || req.body?.id;
+      if (docId && documentStore[docId]) {
+        delete documentStore[docId];
+        rooms.delete(docId);
+        saveDocumentsToDisk();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, deletedId: docId }));
+        return;
+      }
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Manuscript not found' }));
+      return;
+    }
+
     next();
   });
 
